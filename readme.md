@@ -58,11 +58,9 @@ Finding Home is a charming side-scrolling platformer where you brave the element
 
 ### Gameplay Elements
 
-- 💫 Multiple levels
-- 👾 Smart enemy AI
+- 👾 Semi smart enemy AI
 - 💝 Lives system
 - 🎯 Score tracking
-- 🏆 Achievement system
 
 ## 🚀 Getting Started
 
