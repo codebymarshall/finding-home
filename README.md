@@ -1,2 +1,0 @@
-# JSGameProject
-University Of London
