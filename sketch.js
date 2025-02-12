@@ -308,13 +308,17 @@ function startGame() {
           textAlign(CENTER);
           fill(255);
           text("Level Complete", width / 2, height / 2);
-          text("Returning to Main Menu in 10 seconds", gameChar_x, height / 2 + 60);
+          text(
+            "Returning to Main Menu in 10 seconds",
+            gameChar_x,
+            height / 2 + 60
+          );
           isLeft = false;
-					isRight = false;
+          isRight = false;
           setTimeout(() => {
             // Code to execute after 10 seconds
             setup();
-          },);
+          });
           return;
         }
       },
@@ -419,7 +423,7 @@ function startGame() {
       },
       create: function () {
         for (let i = 0; i < 60; i++) {
-          this.x_pos.push(random(0, scene.house.center + 100));
+          this.x_pos.push(random(500, scene.house.center + 100));
           this.width.push(random(15, 40));
         }
       },
@@ -524,11 +528,11 @@ function startGame() {
     rain: {},
   };
 
-	scene.canyons.create(); // Make sure canyons are created first
-	
-// create enemy
+  scene.canyons.create(); // Make sure canyons are created first
+
+  // create enemy
   for (i = 0; i < 60; i++) {
-    let newX = random(0, scene.house.center);
+    let newX = random(500, scene.house.center);
     let isOverCanyon = false;
 
     // Check if position overlaps with any canyon
@@ -643,11 +647,12 @@ function draw() {
       enemies[i].draw();
       let isContact = enemies[i].checkContact(gameChar_x, gameChar_y);
       if (isContact) {
+        lives -= 1;
         if (lives > 0) {
-          lives -= 1;
-          startGame();
-          break;
+          startGame(); // Reset position if still have lives
         }
+        checkPlayerDie(); // Check for game over
+        break;
       }
     }
     pop();
@@ -716,10 +721,8 @@ function keyReleased() {
   }
 }
 function checkPlayerDie() {
-  if (isPlummeting && lives > 1) {
-    lives -= 1;
-    startGame();
-  } else {
+  if (lives <= 0) {
+    // Game over when no lives remain
     gameState = "dead";
     menuButtons.returnToMenu.show();
 
@@ -727,6 +730,10 @@ function checkPlayerDie() {
     rain.stop();
     theme.stop();
     isAudioPlaying = false;
+  } else if (isPlummeting) {
+    // Handle plummeting with lives remaining
+    lives -= 1;
+    startGame();
   }
 }
 function interactions() {
