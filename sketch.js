@@ -155,39 +155,43 @@ function startGame() {
           if (!isOverlapping) {
             fill(123, 113, 103);
             noStroke();
-            triangle(
+            // This is the small mountain
+						triangle(
               this.x_pos[i] + 400,
               floorPos_y,
               this.x_pos[i] + 480,
-              this.y_pos +  50,
+              floorPos_y - 150,
               this.x_pos[i] + 550,
               floorPos_y
-            );
+						);
+						// this is the big mountain
             triangle(
               this.x_pos[i] + 300,
               floorPos_y,
               this.x_pos[i] + 380,
-              this.y_pos + 150,
+              floorPos_y - 300,
               this.x_pos[i] + 450,
               floorPos_y
             );
-            fill(255);
-            triangle(
-              this.x_pos[i] + 440,
-              floorPos_y - 110,
-              this.x_pos[i] + 480,
-              this.y_pos + 50,
-              this.x_pos[i] + 515,
-              floorPos_y - 110
-            );
-            triangle(
-              this.x_pos[i] + 340,
-              floorPos_y - 60,
-              this.x_pos[i] + 380,
-              this.y_pos + 150,
-              this.x_pos[i] + 415,
-              floorPos_y - 60
-            );
+						fill(255);
+						// this is the small mountain
+						triangle(
+							this.x_pos[i] + 440,
+							floorPos_y - 75,
+							this.x_pos[i] + 480,
+							floorPos_y - 150,
+							this.x_pos[i] + 515,
+							floorPos_y - 75
+						);
+						// this is the big mountain
+						triangle(
+							this.x_pos[i] + 340,
+							floorPos_y - 150,
+							this.x_pos[i] + 380,
+							floorPos_y - 300,
+							this.x_pos[i] + 415,
+							floorPos_y - 150
+						);
           }
         }
       },
