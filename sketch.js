@@ -30,6 +30,8 @@ let right;
 let standing;
 let enemy;
 let isAudioPlaying = false; // Flag to track audio state
+let gameState = "menu";
+let menuButtons;
 
 function preload() {
   soundFormats("mp3");
@@ -45,43 +47,62 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   floorPos_y = windowHeight * 0.7;
   lives = 3;
-  playButton = createButton("Play Audio");
-  playButton.mousePressed(startAudio); // Start audio on button press
-  playButton.position(20, 70); // Position the button on the canvas
+  isAudioPlaying = false;
 
-  startGame();
+  menuButtons = {
+    play: createButton("Play"),
+    instructions: createButton("Instructions"),
+    back: createButton("Back"),
+    returnToMenu: createButton("Return to Menu"),
+  };
+
+  // Position all buttons
+  menuButtons.play.position(width / 2 - 40, height / 2);
+  menuButtons.instructions.position(width / 2 - 40, height / 2 + 40);
+  menuButtons.back.position(width / 2 - 40, height / 2 + 80);
+  menuButtons.returnToMenu.position(width / 2 - 40, height / 2 + 80);
+
+  // Hide buttons that shouldn't be visible initially
+  menuButtons.back.hide();
+  menuButtons.returnToMenu.hide();
+
+  menuButtons.play.mousePressed(() => {
+    gameState = "playing";
+    hideMenuButtons();
+    startAudio();
+    startGame();
+  });
+
+  menuButtons.instructions.mousePressed(() => {
+    gameState = "instructions";
+    menuButtons.play.hide();
+    menuButtons.instructions.hide();
+    menuButtons.back.show();
+  });
+
+  menuButtons.back.mousePressed(() => {
+    gameState = "menu";
+    menuButtons.play.show();
+    menuButtons.instructions.show();
+    menuButtons.back.hide();
+  });
+
+  menuButtons.returnToMenu.mousePressed(() => {
+    gameState = "menu";
+    lives = 3;
+    isAudioPlaying = true;
+    menuButtons.returnToMenu.hide();
+    setup();
+  });
+
+  startGame(); // Initialize game elements
 }
 function startGame() {
   rainDrops = [];
   splashes = [];
   platforms = [];
   enemies = [];
-  for (i = 0; i < 50; i++) {
-    enemies.push(
-      new Enemies(random(0 * 5, width * 10), floorPos_y - 5, 150)
-    );
-  }
 
-  for (i = 0; i < 100; i++) {
-    platforms.push(
-      createPlatforms(
-        random(0, 18000),
-        floorPos_y - 100,
-        random(50, 150)
-      )
-    );
-  }
-  for (let i = 0; i < 600; i++) {
-    rainDrops.push(new RainDrop());
-  }
-  lightningAlpha = 0;
-  gameChar_x = windowWidth * 0.2;
-  gameChar_y = floorPos_y;
-  game_score = 0;
-  isLeft = false; //char movement states
-  isRight = false;
-  isFalling = false;
-  isPlummeting = false;
   scene = {
     trees: {
       x_pos: [],
@@ -156,15 +177,15 @@ function startGame() {
             fill(123, 113, 103);
             noStroke();
             // This is the small mountain
-						triangle(
+            triangle(
               this.x_pos[i] + 400,
               floorPos_y,
               this.x_pos[i] + 480,
               floorPos_y - 150,
               this.x_pos[i] + 550,
               floorPos_y
-						);
-						// this is the big mountain
+            );
+            // this is the big mountain
             triangle(
               this.x_pos[i] + 300,
               floorPos_y,
@@ -173,25 +194,25 @@ function startGame() {
               this.x_pos[i] + 450,
               floorPos_y
             );
-						fill(255);
-						// this is the small mountain
-						triangle(
-							this.x_pos[i] + 440,
-							floorPos_y - 75,
-							this.x_pos[i] + 480,
-							floorPos_y - 150,
-							this.x_pos[i] + 515,
-							floorPos_y - 75
-						);
-						// this is the big mountain
-						triangle(
-							this.x_pos[i] + 340,
-							floorPos_y - 150,
-							this.x_pos[i] + 380,
-							floorPos_y - 300,
-							this.x_pos[i] + 415,
-							floorPos_y - 150
-						);
+            fill(255);
+            // this is the small mountain
+            triangle(
+              this.x_pos[i] + 440,
+              floorPos_y - 75,
+              this.x_pos[i] + 480,
+              floorPos_y - 150,
+              this.x_pos[i] + 515,
+              floorPos_y - 75
+            );
+            // this is the big mountain
+            triangle(
+              this.x_pos[i] + 340,
+              floorPos_y - 150,
+              this.x_pos[i] + 380,
+              floorPos_y - 300,
+              this.x_pos[i] + 415,
+              floorPos_y - 150
+            );
           }
         }
       },
@@ -286,10 +307,14 @@ function startGame() {
           textSize(60);
           textAlign(CENTER);
           fill(255);
-          text("Level Complete", gameChar_x, height / 2);
-          text("Press Space To Continue", gameChar_x, height / 2 + 60);
+          text("Level Complete", width / 2, height / 2);
+          text("Returning to Main Menu in 10 seconds", gameChar_x, height / 2 + 60);
           isLeft = false;
-          isRight = false;
+					isRight = false;
+          setTimeout(() => {
+            // Code to execute after 10 seconds
+            setup();
+          },);
           return;
         }
       },
@@ -406,7 +431,7 @@ function startGame() {
       draw: function () {
         for (let i = 0; i < this.x_pos.length; i++) {
           //first cloud
-          fill(193, 190, 186);
+          fill(209, 209, 209);
           ellipse(
             this.x_pos[i] + 50,
             this.y_pos[i] + 50,
@@ -479,7 +504,7 @@ function startGame() {
       size: 100,
       speed: 0.3,
       draw: function () {
-        fill(246, 241, 213);
+        fill(141, 141, 144);
         ellipse(this.x_pos, this.y_pos, this.size, this.size);
         this.x_pos += this.speed;
         if (this.x_pos >= width || this.x_pos <= 0) {
@@ -498,11 +523,51 @@ function startGame() {
     },
     rain: {},
   };
+
+	scene.canyons.create(); // Make sure canyons are created first
+	
+// create enemy
+  for (i = 0; i < 60; i++) {
+    let newX = random(0, scene.house.center);
+    let isOverCanyon = false;
+
+    // Check if position overlaps with any canyon
+    for (let j = 0; j < scene.canyons.x_pos.length; j++) {
+      if (
+        newX > scene.canyons.x_pos[j] - 100 &&
+        newX < scene.canyons.x_pos[j] + scene.canyons.width[j] + 100
+      ) {
+        isOverCanyon = true;
+        break;
+      }
+    }
+
+    // Only create enemy if not over canyon
+    if (!isOverCanyon) {
+      enemies.push(new Enemies(newX, floorPos_y - 5, 150));
+    }
+  }
+
+  for (i = 0; i < 100; i++) {
+    platforms.push(
+      createPlatforms(random(0, 18000), floorPos_y - 100, random(50, 150))
+    );
+  }
+  for (let i = 0; i < 600; i++) {
+    rainDrops.push(new RainDrop());
+  }
+  lightningAlpha = 0;
+  gameChar_x = windowWidth * 0.2;
+  gameChar_y = floorPos_y;
+  game_score = 0;
+  isLeft = false; //char movement states
+  isRight = false;
+  isFalling = false;
+  isPlummeting = false;
   scene.clouds.create(); //Create clouds
   scene.stars.create(); // Create stars
   scene.mountains.create(); //Create mountains
   scene.trees.create(); //Create trees
-  scene.canyons.create(); //Create canyons
   scene.collectables[0].create(); // Create collectables
   scene.house.initialize(); // Initialize house position
   (gameChar = {
@@ -522,82 +587,105 @@ function startGame() {
     (cameraPos_X = 0); //game world camera
 }
 function draw() {
-  //camera tracking
-  if (isRight == true && isFalling == false) {
-    cameraPos_X += 2;
-  } else if (isLeft == true && isFalling == false) {
-    cameraPos_X -= 2;
+  if (gameState === "menu" || gameState === "instructions") {
+    background(43, 47, 119);
+    textSize(32);
+    textAlign(CENTER);
+    fill(255);
+    text("Finding Home", width / 2, height / 2 - 60);
+
+    if (gameState === "instructions") {
+      textSize(20);
+      text(
+        "Use Arrow Keys or A/D to move\nPress W or UP to jump\nCollect coins and reach home!",
+        width / 2,
+        height / 2
+      );
+    }
+  } else if (gameState === "dead") {
+    background(43, 47, 119);
+    textSize(50);
+    textAlign(CENTER);
+    fill(255);
+    text("GAME OVER", width / 2, height / 2);
   } else {
-    //stay still
-  }
-  background(43, 47, 119);
-  noStroke();
-  fill(0, 155, 0);
-  rect(0, floorPos_y, width, height - floorPos_y); //draw some green ground
-  push(); //part of camera tracking code
-  translate(-cameraPos_X + 100, 0);
-  scene.mountains.draw(); //draw mountains
-  scene.trees.draw(); //draw the tree
-  scene.stars.draw(); //draw stars
-  scene.moon.draw(); //draw moon
-  scene.clouds.draw(); //draw clouds
-  fill(255);
-  text("Score  " + game_score, cameraPos_X - 70, 30); //draw game score
-  scene.canyons.main(); //draw & check the canyon
-  for (var i = 0; i < platforms.length; i++) {
-    platforms[i].draw();
-  }
-  scene.lives.draw(); //draw lives on screen
-  scene.collectables[0].main(); //draw & check the collectable
-  scene.house.draw(); //draw house
-  scene.house.check(); //house check
-  gameChar.draw(); //the game character
-  for (var i = 0; i < enemies.length; i++) {
-    enemies[i].draw();
-    let isContact = enemies[i].checkContact(gameChar_x, gameChar_y);
-    if (isContact) {
-      if (lives > 0) {
-        lives -= 1;
-        startGame();
-        break;
+    //camera tracking
+    if (isRight == true && isFalling == false) {
+      cameraPos_X += 2;
+    } else if (isLeft == true && isFalling == false) {
+      cameraPos_X -= 2;
+    } else {
+      //stay still
+    }
+    background(43, 47, 119);
+    noStroke();
+    fill(0, 155, 0);
+    rect(0, floorPos_y, width, height - floorPos_y); //draw some green ground
+    push(); //part of camera tracking code
+    translate(-cameraPos_X + 100, 0);
+    scene.mountains.draw(); //draw mountains
+    scene.trees.draw(); //draw the tree
+    scene.stars.draw(); //draw stars
+    scene.moon.draw(); //draw moon
+    scene.clouds.draw(); //draw clouds
+    fill(255);
+    text("Score  " + game_score, cameraPos_X - 20, 30); //draw game score
+    scene.canyons.main(); //draw & check the canyon
+    for (var i = 0; i < platforms.length; i++) {
+      platforms[i].draw();
+    }
+    scene.lives.draw(); //draw lives on screen
+    scene.collectables[0].main(); //draw & check the collectable
+    scene.house.draw(); //draw house
+    scene.house.check(); //house check
+    gameChar.draw(); //the game character
+    for (var i = 0; i < enemies.length; i++) {
+      enemies[i].draw();
+      let isContact = enemies[i].checkContact(gameChar_x, gameChar_y);
+      if (isContact) {
+        if (lives > 0) {
+          lives -= 1;
+          startGame();
+          break;
+        }
       }
     }
-  }
-  pop();
-  for (let i = rainDrops.length - 1; i >= 0; i--) {
-    let drop = rainDrops[i];
-    drop.show();
-    drop.fall();
-    drop.drift();
+    pop();
+    for (let i = rainDrops.length - 1; i >= 0; i--) {
+      let drop = rainDrops[i];
+      drop.show();
+      drop.fall();
+      drop.drift();
 
-    if (drop.isOffScreen()) {
-      rainDrops.splice(i, 1);
+      if (drop.isOffScreen()) {
+        rainDrops.splice(i, 1);
 
-      // Determine how many new drops to spawn
-      let newDropsCount = floor(random(30, 50)); // Spawns between 2 and 5 drops
+        // Determine how many new drops to spawn
+        let newDropsCount = floor(random(30, 50)); // Spawns between 2 and 5 drops
 
-      // Spawn the new drops
-      for (let j = 0; j < newDropsCount; j++) {
-        rainDrops.push(new RainDrop());
+        // Spawn the new drops
+        for (let j = 0; j < newDropsCount; j++) {
+          rainDrops.push(new RainDrop());
+        }
       }
     }
-  }
-  for (let i = splashes.length - 1; i >= 0; i--) {
-    //splash
-    splashes[i].show();
-    splashes[i].move();
-    if (splashes[i].alpha <= 0) {
-      splashes.splice(i, 1);
+    for (let i = splashes.length - 1; i >= 0; i--) {
+      //splash
+      splashes[i].show();
+      splashes[i].move();
+      if (splashes[i].alpha <= 0) {
+        splashes.splice(i, 1);
+      }
     }
+    if (random(1) < 0.01) {
+      // 1% chance of lightning on each draw cycle
+      lightningAlpha = 200; // Start with a strong flash
+      // Play thunder sound here if desired
+    }
+    fill(255, 255, 255, lightningAlpha);
+    rect(0, 0, width, height);
+    lightningAlpha = constrain(lightningAlpha - 10, 0, 255); // Fade out the flash
   }
-  if (random(1) < 0.01) {
-    // 1% chance of lightning on each draw cycle
-    lightningAlpha = 200; // Start with a strong flash
-    // Play thunder sound here if desired
-  }
-  fill(255, 255, 255, lightningAlpha);
-  rect(0, 0, width, height);
-  lightningAlpha = constrain(lightningAlpha - 10, 0, 255); // Fade out the flash
   interactions();
 }
 function keyPressed() {
@@ -632,12 +720,13 @@ function checkPlayerDie() {
     lives -= 1;
     startGame();
   } else {
-    textSize(50);
-    textAlign(CENTER);
-    fill(255);
-    text("GAME OVER ", gameChar_x, height / 2);
-    text("Press Space To Continue", gameChar_x, height / 2 + 60);
-    return;
+    gameState = "dead";
+    menuButtons.returnToMenu.show();
+
+    // Stop all audio
+    rain.stop();
+    theme.stop();
+    isAudioPlaying = false;
   }
 }
 function interactions() {
@@ -711,13 +800,11 @@ function startAudio() {
   if (isAudioPlaying) {
     rain.stop(); // Stop the rain sound
     theme.stop(); // Stop the theme sound
-    playButton.html("Play Audio"); // Change button text to "Play Audio"
   } else {
     rain.setVolume(0.4); // Set rain volume to 50%
     theme.setVolume(0.8); // Set theme volume to 80%
     rain.loop(); // Start looping the rain sound
     theme.loop(); // Start looping the theme sound
-    playButton.html("Stop Audio"); // Change button text to "Stop Audio"
   }
 
   isAudioPlaying = !isAudioPlaying; // Toggle the audio state
@@ -803,19 +890,43 @@ function Enemies(x, y, range) {
   this.y = y;
   this.range = range;
   this.currentX = x;
-  this.inc = 1;
+  this.inc = random([-2, -1.5, -1, 1, 1.5, 2]); // Random speed and direction
+
   this.update = function () {
-    this.currentX += this.inc;
-    if (this.currentX >= this.x + this.range) {
-      this.inc = -1;
-    } else if (this.currentX < this.x) {
-      this.inc = 1;
+    let nextX = this.currentX + this.inc;
+
+    // Check for canyon collision with a buffer zone
+    let isNearCanyon = false;
+    for (let i = 0; i < scene.canyons.x_pos.length; i++) {
+      if (
+        nextX > scene.canyons.x_pos[i] - 50 && // Add buffer before canyon
+        nextX < scene.canyons.x_pos[i] + scene.canyons.width[i] + 50 // Add buffer after canyon
+      ) {
+        isNearCanyon = true;
+        break;
+      }
+    }
+
+    // Move freely within range if not near canyon
+    if (!isNearCanyon) {
+      this.currentX = nextX;
+      // Check range boundaries
+      if (this.currentX >= this.x + this.range) {
+        this.inc = random([-2, -1.5, -1]); // Random negative speed
+      } else if (this.currentX < this.x) {
+        this.inc = random([1, 1.5, 2]); // Random positive speed
+      }
+    } else {
+      // Reverse direction if near canyon
+      this.inc *= -1;
     }
   };
+
   this.draw = function () {
     this.update();
     image(enemy, this.currentX - 50, this.y - 95);
   };
+
   this.checkContact = function (gc_x, gc_y) {
     let d = dist(gc_x, gc_y, this.currentX, this.y);
     if (d < 20) {
@@ -823,4 +934,7 @@ function Enemies(x, y, range) {
     }
     return false;
   };
+}
+function hideMenuButtons() {
+  Object.values(menuButtons).forEach((button) => button.hide());
 }
